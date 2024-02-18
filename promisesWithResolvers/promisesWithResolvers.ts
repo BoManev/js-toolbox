@@ -12,9 +12,10 @@ const mapper =
         };
 
         let cursor = 0;
-
+        let resolved = 0;
         const next = () => {
-            if (cursor === count) { resolve(results); return; }
+            if (resolved === count) { resolve(results); return; }
+            if (cursor === count) { return; }
 
             const index = cursor++;
             tasks[index]()
@@ -22,7 +23,10 @@ const mapper =
                     (value) => { results[index] = { status: "fulfilled", value }; },
                     (reason) => { results[index] = { status: "rejected", reason }; },
                 ).then(
-                    () => { setTimeout(next, 0) },
+                    () => {
+                        resolved++
+                        process.nextTick(next)
+                    },
                 );
         };
 
